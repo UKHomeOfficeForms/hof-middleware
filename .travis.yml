@@ -3,6 +3,11 @@ node_js:
   - "4"
   - "5"
 
+script:
+  - npm run lint
+  - npm run style
+  - npm test
+
 cache:
   directories:
     - node_modules
