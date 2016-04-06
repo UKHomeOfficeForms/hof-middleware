@@ -4,6 +4,10 @@
   "description": "A collection of commonly used HOF middleware",
   "main": "index.js",
   "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UKHomeOffice/hof-middleware.git"
+  },
   "bugs": {
     "url": "https://github.com/UKHomeOffice/hof-middleware/issues"
   },
@@ -13,6 +17,9 @@
     "test": "NODE_ENV=test mocha",
     "lint": "eslint .",
     "style": "jscs **/*.js --config=./.jscsrc.json"
+  },
+  "engines": {
+    "node": ">=4 <5"
   },
   "devDependencies": {
     "chai": "^3.0.0",
