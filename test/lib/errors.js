@@ -73,34 +73,6 @@ describe('errors', () => {
       });
     });
 
-    it('renders the error stack in development environment', () => {
-      process.env.NODE_ENV = 'development';
-      err = {
-        code: ''
-      };
-      middleware(err, req, res, next);
-      res.render.should.have.been.calledWith('error', {
-        content: {message: 'errors.default.message', title: 'errors.default.title'},
-        error: {code: ''},
-        showStack: true,
-        startLink: 'my-hof-journey'
-      });
-    });
-
-    it('renders the error stack in docker-compose environment', () => {
-      process.env.NODE_ENV = 'development';
-      err = {
-        code: ''
-      };
-      middleware(err, req, res, next);
-      res.render.should.have.been.calledWith('error', {
-        content: {message: 'errors.default.message', title: 'errors.default.title'},
-        error: {code: ''},
-        showStack: true,
-        startLink: 'my-hof-journey'
-      });
-    });
-
   });
 
   describe('without a translate function', () => {
@@ -143,6 +115,86 @@ describe('errors', () => {
         logger.error.should.have.been.calledWith('Error');
       });
 
+    });
+
+  });
+
+  describe('when debug is true', () => {
+
+    var logger = {};
+
+    beforeEach(() => {
+      res = httpMock.createResponse({
+        eventEmitter: require('events').EventEmitter
+      });
+      translate = sinon.stub().returnsArg(0);
+      logger.error = sinon.spy();
+      middleware = require('../../lib/errors')(translate, {debug: true});
+      next = sinon.stub();
+    });
+
+    describe('the middleware', () => {
+
+      beforeEach(() => {
+        req = httpMock.createRequest({
+          method: 'GET',
+          url: '/my-hof-journey',
+        });
+        res.render = sinon.spy();
+      });
+
+      it('shows the stack trace', () => {
+        err = {
+          code: ''
+        };
+        middleware(err, req, res, next);
+        res.render.should.have.been.calledWith('error', {
+          content: {message: 'errors.default.message', title: 'errors.default.title'},
+          error: {code: ''},
+          showStack: true,
+          startLink: 'my-hof-journey'
+        });
+      });
+    });
+
+  });
+
+  describe('defaults to debug false', () => {
+
+    var logger = {};
+
+    beforeEach(() => {
+      res = httpMock.createResponse({
+        eventEmitter: require('events').EventEmitter
+      });
+      translate = sinon.stub().returnsArg(0);
+      logger.error = sinon.spy();
+      middleware = require('../../lib/errors')(translate);
+      next = sinon.stub();
+    });
+
+    describe('the middleware', () => {
+
+      beforeEach(() => {
+        req = httpMock.createRequest({
+          method: 'GET',
+          url: '/my-hof-journey',
+        });
+        res.render = sinon.spy();
+      });
+
+      it('shows the stack trace', () => {
+        err = {
+          code: ''
+        };
+        middleware(err, req, res, next);
+        res.render.should.have.been.calledWith('error', {
+          content: {message: 'errors.default.message', title: 'errors.default.title'},
+          error: {code: ''},
+          showStack: false,
+          startLink: 'my-hof-journey'
+        });
+      });
     });
 
   });
