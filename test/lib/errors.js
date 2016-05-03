@@ -30,8 +30,13 @@ describe('errors', () => {
     });
 
     it('translates', function () {
-      middleware({}, req, res, next);
+      err = {};
+      middleware(err, req, res, next);
       translate.should.have.been.called;
+    });
+
+    it('accepts four arguments', function () {
+      middleware.should.have.length(4);
     });
 
     it('renders with session error when error code is SESSION_TIMEOUT', () => {
