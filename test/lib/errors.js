@@ -62,12 +62,12 @@ describe('errors', () => {
 
     it('renders with default error when error code is neither SESSION_TIMEOUT or NO_COOKIES', () => {
       err = {
-        code: ''
+        code: 'UNKNOWN'
       };
       middleware(err, req, res, next);
       res.render.should.have.been.calledWith('error', {
         content: {message: 'errors.default.message', title: 'errors.default.title'},
-        error: {code: ''},
+        error: {code: 'UNKNOWN'},
         showStack: false,
         startLink: 'my-hof-journey'
       });
@@ -144,13 +144,25 @@ describe('errors', () => {
       });
 
       it('shows the stack trace', () => {
+        err = {};
+        middleware(err, req, res, next);
+        res.render.should.have.been.calledWith('error', {
+          content: {message: err, title: 'errors.default.title'},
+          error: err,
+          showStack: true,
+          startLink: 'my-hof-journey'
+        });
+      });
+
+      it('uses err message if available', () => {
         err = {
-          code: ''
+          code: 'UNKNOWN',
+          message: 'Error message'
         };
         middleware(err, req, res, next);
         res.render.should.have.been.calledWith('error', {
-          content: {message: 'errors.default.message', title: 'errors.default.title'},
-          error: {code: ''},
+          content: {message: 'Error message', title: 'errors.default.title'},
+          error: {code: 'UNKNOWN', message: 'Error message'},
           showStack: true,
           startLink: 'my-hof-journey'
         });
@@ -185,12 +197,12 @@ describe('errors', () => {
 
       it('shows the stack trace', () => {
         err = {
-          code: ''
+          code: 'UNKNOWN'
         };
         middleware(err, req, res, next);
         res.render.should.have.been.calledWith('error', {
           content: {message: 'errors.default.message', title: 'errors.default.title'},
-          error: {code: ''},
+          error: {code: 'UNKNOWN'},
           showStack: false,
           startLink: 'my-hof-journey'
         });
