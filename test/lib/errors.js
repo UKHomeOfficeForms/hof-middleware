@@ -3,12 +3,12 @@
 const httpMock = require('node-mocks-http');
 
 describe('errors', () => {
-  var middleware;
-  var err;
-  var req;
-  var res;
-  var next;
-  var translate;
+  let middleware;
+  let err;
+  let req;
+  let res;
+  let next;
+  let translate;
 
   beforeEach(() => {
     res = httpMock.createResponse({
@@ -133,7 +133,7 @@ describe('errors', () => {
 
   describe('with a logger', () => {
 
-    var logger = {};
+    const logger = {};
 
     beforeEach(() => {
       res = httpMock.createResponse({
@@ -169,7 +169,7 @@ describe('errors', () => {
 
   describe('when debug is true', () => {
 
-    var logger = {};
+    const logger = {};
 
     beforeEach(() => {
       res = httpMock.createResponse({
@@ -224,7 +224,7 @@ describe('errors', () => {
 
   describe('defaults to debug false', () => {
 
-    var logger = {};
+    const logger = {};
 
     beforeEach(() => {
       res = httpMock.createResponse({
