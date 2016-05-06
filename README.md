@@ -1,12 +1,11 @@
 # hof-middleware
 A collection of commonly used HOF middleware
 
-HOF exports middleware with `cookies`. Currently the middleware only
-adds support for testing whether cookies are supported in the client and
-raising an error when they are not.
+HOF exports middleware with `cookies` and `errors`.
 
-## Usage
+## Cookies
 
+### Usage
 ```js
 app.use(require('hof-middleware').cookies({
   'cookie-name': 'my-application-cookie',
@@ -16,6 +15,7 @@ app.use(require('hof-middleware').cookies({
 
 This middleware must be declared before your other routes.
 
+### Options
 The `cookie-name` can be the same as your session cookie. (The
 middleware will not overwrite it.) Defaults to `hof-cookie-check`.
 
@@ -25,4 +25,24 @@ you are using elsewhere. In almost all cases the default value of
 
 The error raised when cookies are not supported by the client can then
 be handled in you error handler by identifying it using its `code`
-property which will be set to `NO_COOKIES`. An example of handling this error can be found in the [hof-example-form](https://github.com/UKHomeOffice/hof-example-form/blob/master/errors/index.js).
+property which will be set to `NO_COOKIES`.
+
+## Errors
+
+### Usage
+```js
+app.use(require('hof-middleware').errors({
+  logger: require('/logger'),
+  translate: require('hof').i18n.translate,
+  debug: true
+}));
+```
+
+This middleware must be declared *after* your other routes.
+
+### Options
+`logger` can be the same any object with an error method.
+
+`translate` can be the HOF i18n translate function
+
+`debug` set to true will present the stack trace in the form and return the err as the content of the template.
