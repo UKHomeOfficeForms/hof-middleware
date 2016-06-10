@@ -2,5 +2,6 @@
 
 module.exports = {
   cookies: require('./lib/cookies'),
-  errors: require('./lib/errors')
+  errors: require('./lib/errors'),
+  notFound: require('./lib/not-found')
 };

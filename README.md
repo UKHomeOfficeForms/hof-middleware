@@ -41,8 +41,28 @@ app.use(require('hof-middleware').errors({
 This middleware must be declared *after* your other routes.
 
 ### Options
-`logger` can be the same any object with an error method.
+`logger` can be any object with an error method.
 
 `translate` can be the HOF i18n translate function
 
 `debug` set to true will present the stack trace in the form and return the err as the content of the template.
+
+## Not found
+
+Expects there to be a view called 404 in your configured `/views` directory
+
+### Usage
+```js
+app.use(require('hof-middleware').notFound({
+  logger: require('/logger'),
+  translate: require('hof').i18n.translate
+}));
+```
+
+This middleware should be declared *after* your other routes but *before* your errorhandler.
+
+### Options
+`logger` can be any object with a warn method.
+
+`translate` can be the HOF i18n translate function
+
