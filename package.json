@@ -21,6 +21,9 @@
   "engines": {
     "node": ">=4 <5"
   },
+  "dependencies": {
+    "lodash": "^4.13.1"
+  },
   "devDependencies": {
     "chai": "^3.0.0",
     "eslint": "^0.23.0",
