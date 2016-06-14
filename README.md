@@ -70,3 +70,46 @@ This middleware must be declared *after* your other routes.
 `debug` set to true will present the stack trace in the form and return the err as the content of the template.
 
 __Note__ If `debug === true` translations will not be served, but the error handler default messages
+=======
+## Deep translate
+
+deepTranslate middleware supports nested conditional translations in order to show different content in different scenarios. The middleware adds a `translate` function to `req` which is used in various points throughout the architecture.  This middleware must be applied before any other middleware which rely on the `req.translate` function. Also when initializing the form wizard, or template mixins, if a `translate` function is provided, this will be used rather than the deepTranslate middleware.
+
+### Usage
+
+```js
+const i18nFuture = require('hof').i18n;
+const i18n = i18nFuture({
+  path: path.resolve(__dirname, './path/to/translations')
+})
+app.use(require('hof-middleware').deepTranslate({
+  translate: i18n.translate.bind(i18n)
+}));
+```
+
+locales
+```json
+"fields": {
+    "field-name": {
+        "label": {
+            "dependent-field": {
+                "value-1": {
+                    "dependent-field-2": {
+                        "value-1": "Label 1",
+                        "value-2": "Label 2"
+                    }
+                },
+                "value-2": "Label 3"
+            },
+            "default": "Fallback label"
+        }
+    }
+}
+```
+
+Using the translation key `fields.field-name.label` will return different values in different situations depending on the values of named fields. In the above example the following are true:
+
+* If both `dependent-field` and `dependent-field-2` have the value `"value-1"`, the label returned will be `"Label 1"`.
+* If the value of `dependent-field` is `"value-1"` and the value of `dependent-field-2` is `"value-2"`, the label returned will be `"Label 2"`.
+* If the value of `dependent-field` is `"value-2"` the label returned will be `"Label 3"` regardless of the value of `dependent-field-2`
+* The default label `"Fallback label"` will be used if value of `dependent-field` is neither of the given options, or it is `undefined`. It will also be used if the value of `dependent-field` is `"value-1"` and the value of `dependent-field-2` is neither of the given options or it is undefined.
