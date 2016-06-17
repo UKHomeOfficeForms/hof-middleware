@@ -7,8 +7,8 @@ describe('deepTranslate middleware', () => {
   let middleware;
   let next;
   const req = {
-    form: {
-      values: {}
+    sessionModel: {
+      get: sinon.stub()
     }
   };
   const res = {};
@@ -71,20 +71,20 @@ describe('deepTranslate middleware', () => {
   });
 
   it('looks up the result if conditional is met', () => {
-    req.form.values['dependent-field'] = 'first-value';
+    req.sessionModel.get.withArgs('dependent-field').returns('first-value');
     req.translate('a-field.label')
       .should.be.equal('Label to show if dependent-field is first-value');
   });
 
   it('looks up the result if alternative conditional is met', () => {
-    req.form.values['dependent-field'] = 'second-value';
+    req.sessionModel.get.withArgs('dependent-field').returns('second-value');
     req.translate('a-field.label')
       .should.be.equal('Label to show if dependent-field is second-value');
   });
 
   it('looks up nested conditions', () => {
-    req.form.values['dependent-field-1'] = 'correct-value';
-    req.form.values['dependent-field-2'] = 'correct-value';
+    req.sessionModel.get.withArgs('dependent-field-1').returns('correct-value');
+    req.sessionModel.get.withArgs('dependent-field-2').returns('correct-value');
     req.translate('another-field.header').should.be.equal('This should be looked up');
   });
 });
