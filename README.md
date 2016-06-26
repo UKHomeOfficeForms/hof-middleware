@@ -1,7 +1,10 @@
 # hof-middleware
-A collection of commonly used HOF middleware
+A collection of commonly used HOF middleware, exports `cookies`, `notFound`, and `errors` on `middleware`
 
-HOF exports middleware with `cookies` and `errors`.
+## Arranging the middleware in your app
+
+Cookies middleware should be placed before any other routes, this guarantees that any data gathered in the form will be saved to the session.
+The Not Found middleware should be placed after all routes and before the Error handler middleware. This arrangement ensures that if an error is thrown it will be caught.
 
 ## Cookies
 
@@ -27,13 +30,32 @@ The error raised when cookies are not supported by the client can then
 be handled in you error handler by identifying it using its `code`
 property which will be set to `NO_COOKIES`.
 
+## Not found (404)
+
+Expects there to be a view called 404 in your configured `/views` directory
+
+### Usage
+```js
+app.use(require('hof-middleware').notFound({
+  logger: require('/logger'),
+  translate: require('hof').i18n({path: path_to_translations/__lng__/__ns__.json}).translate
+}));
+```
+
+This middleware should be declared *after* your other routes but *before* your errorhandler.
+
+### Options
+`logger` can be any object with a warn method.
+
+`translate` can be the HOF i18n translate function
+
 ## Errors
 
 ### Usage
 ```js
 app.use(require('hof-middleware').errors({
   logger: require('/logger'),
-  translate: require('hof').i18n.translate,
+  translate: require('hof').i18n({path: path_to_translations/__lng__/__ns__.json}).translate,
   debug: true
 }));
 ```
@@ -47,22 +69,4 @@ This middleware must be declared *after* your other routes.
 
 `debug` set to true will present the stack trace in the form and return the err as the content of the template.
 
-## Not found
-
-Expects there to be a view called 404 in your configured `/views` directory
-
-### Usage
-```js
-app.use(require('hof-middleware').notFound({
-  logger: require('/logger'),
-  translate: require('hof').i18n.translate
-}));
-```
-
-This middleware should be declared *after* your other routes but *before* your errorhandler.
-
-### Options
-`logger` can be any object with a warn method.
-
-`translate` can be the HOF i18n translate function
-
+__Note__ If `debug === true` translations will not be served, but the error handler default messages
