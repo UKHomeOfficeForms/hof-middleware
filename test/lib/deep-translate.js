@@ -54,7 +54,11 @@ describe('deepTranslate middleware', () => {
             'value-3': '3'
           }
         }
-      }
+      },
+      array: [
+        'value-1',
+        'value-2'
+      ]
     };
     next = sinon.stub();
     middleware = deepTranslate({
@@ -99,6 +103,10 @@ describe('deepTranslate middleware', () => {
     req.sessionModel.get.withArgs('dependent-field-1').returns('correct-value');
     req.sessionModel.get.withArgs('dependent-field-2').returns('correct-value');
     req.translate('another-field.header').should.be.equal('This should be looked up');
+  });
+
+  it('returns array if looked up', () => {
+    req.translate('array').should.be.an('array');
   });
 
   describe('Multi value fields', () => {
