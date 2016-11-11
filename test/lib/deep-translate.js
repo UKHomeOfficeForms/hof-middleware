@@ -71,6 +71,10 @@ describe('deepTranslate middleware', () => {
     req.translate.should.be.ok;
   });
 
+  it('adds a rawTranslate function to req', () => {
+    req.rawTranslate.should.be.ok;
+  });
+
   it('calls next', () => {
     next.should.have.been.calledOnce.and.calledWithExactly();
   });
