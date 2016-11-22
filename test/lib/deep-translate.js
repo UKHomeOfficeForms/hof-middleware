@@ -3,15 +3,16 @@
 const deepTranslate = require('../../lib/deep-translate');
 
 describe('deepTranslate middleware', () => {
-  let locales;
-  let middleware;
-  let next;
   const req = {
     sessionModel: {
       get: sinon.stub()
     }
   };
   const res = {};
+  let locales;
+  let middleware;
+  let next;
+  let translate;
 
   beforeEach(() => {
     locales = {
@@ -54,17 +55,26 @@ describe('deepTranslate middleware', () => {
             'value-3': '3'
           }
         }
-      }
+      },
+      array: [
+        'value-1',
+        'value-2'
+      ]
     };
+    translate = key => key.split('.').reduce((ref, keyPart) => ref[keyPart], locales) || key;
     next = sinon.stub();
     middleware = deepTranslate({
-      translate: key => key.split('.').reduce((ref, keyPart) => ref[keyPart], locales) || key
+      translate,
     });
     middleware(req, res, next);
   });
 
   it('adds a translate function to req', () => {
     req.translate.should.be.ok;
+  });
+
+  it('adds a rawTranslate function to req', () => {
+    req.rawTranslate.should.be.ok.and.be.equal(translate);
   });
 
   it('calls next', () => {
@@ -99,6 +109,10 @@ describe('deepTranslate middleware', () => {
     req.sessionModel.get.withArgs('dependent-field-1').returns('correct-value');
     req.sessionModel.get.withArgs('dependent-field-2').returns('correct-value');
     req.translate('another-field.header').should.be.equal('This should be looked up');
+  });
+
+  it('returns array if looked up', () => {
+    req.translate('array').should.be.an('array');
   });
 
   describe('Multi value fields', () => {
