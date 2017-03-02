@@ -3,18 +3,20 @@
 const deepTranslate = require('../../lib/deep-translate');
 
 describe('deepTranslate middleware', () => {
-  const req = {
-    sessionModel: {
-      get: sinon.stub()
-    }
-  };
-  const res = {};
+  let req;
+  let res;
   let locales;
   let middleware;
   let next;
   let translate;
 
   beforeEach(() => {
+    req = {
+      sessionModel: {
+        get: sinon.stub()
+      }
+    };
+    res = {};
     locales = {
       a: 'a shallow value',
       b: {
