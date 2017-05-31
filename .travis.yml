@@ -1,13 +1,13 @@
 language: node_js
 node_js:
-  - "4"
-  - "6"
-
+  - '4'
+  - '6'
+  - '7'
+  - '8'
 script:
   - npm run lint
   - npm run style
   - npm test
-
 cache:
   directories:
     - node_modules
