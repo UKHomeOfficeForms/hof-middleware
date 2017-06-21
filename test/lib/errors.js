@@ -1,19 +1,15 @@
 'use strict';
 
-const httpMock = require('node-mocks-http');
+const reqres = require('reqres');
 
 describe('errors', () => {
   let middleware;
-  let err;
   let req;
   let res;
   let next;
   let translate;
 
   beforeEach(() => {
-    res = httpMock.createResponse({
-      eventEmitter: require('events').EventEmitter
-    });
     translate = sinon.stub().returnsArg(0);
     middleware = require('../../lib/errors')({translate: translate});
     next = sinon.stub();
@@ -21,16 +17,19 @@ describe('errors', () => {
 
   describe('middleware', () => {
 
+    const html = '<html></html>';
+
     beforeEach(() => {
-      req = httpMock.createRequest({
-        method: 'GET',
-        url: '/my-hof-journey',
+      res = reqres.res();
+      req = reqres.req({
+        path: '/my-hof-journey',
+        method: 'GET'
       });
-      res.render = sinon.spy();
+      res.render = sinon.stub();
     });
 
     it('translates when a translate function is provided', () => {
-      err = {};
+      const err = {};
       middleware(err, req, res, next);
       translate.should.have.been.called;
     });
@@ -39,43 +38,141 @@ describe('errors', () => {
       middleware.should.have.length(4);
     });
 
-    it('renders with session error when error code is SESSION_TIMEOUT', () => {
-      err = {
-        code: 'SESSION_TIMEOUT'
-      };
-      middleware(err, req, res, next);
-      res.render.should.have.been.calledWith('error', {
-        content: {message: 'errors.session.message', title: 'errors.session.title'},
-        error: {code: 'SESSION_TIMEOUT'},
-        showStack: false,
-        startLink: 'my-hof-journey'
+    describe('when only the default error template is available', () => {
+
+      beforeEach(() => {
+        res.render.onCall(0).yields('error', html);
       });
+
+      it('renders the `error` template with `401` status', () => {
+
+        res.render = sinon.stub();
+        res.render.onCall(0).yields('error', html);
+
+        const err = {
+          code: 'SESSION_TIMEOUT'
+        };
+
+        const locals = {
+          content: {message: 'errors.session.message', title: 'errors.session.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(401);
+        res.render.should.have.been.calledWith('session-timeout', sinon.match(locals));
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+
+      });
+
+      it('renders the `error` template with `403` status', () => {
+
+        const err = {
+          code: 'NO_COOKIES'
+        };
+
+        const locals = {
+          content: {message: 'errors.cookies-required.message', title: 'errors.cookies-required.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(403);
+        res.render.should.have.been.calledWith('cookie-error', sinon.match(locals));
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+      });
+
+      it('renders the `error` template with `500` status', () => {
+
+        const err = {
+          code: 'UNKNOWN'
+        };
+
+        const locals = {
+          content: {message: 'errors.default.message', title: 'errors.default.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(500);
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+      });
+
     });
 
-    it('renders with cookies-required error when error code is NO_COOKIES', () => {
-      err = {
-        code: 'NO_COOKIES'
-      };
-      middleware(err, req, res, next);
-      res.render.should.have.been.calledWith('error', {
-        content: {message: 'errors.cookies-required.message', title: 'errors.cookies-required.title'},
-        error: {code: 'NO_COOKIES', status: 403},
-        showStack: false,
-        startLink: 'my-hof-journey'
-      });
-    });
+    describe('when specific templates are available', () => {
 
-    it('renders with UNKNOWN error when error code is neither SESSION_TIMEOUT or NO_COOKIES', () => {
-      err = {
-        code: 'UNKNOWN'
-      };
-      middleware(err, req, res, next);
-      res.render.should.have.been.calledWith('error', {
-        content: {message: 'errors.default.message', title: 'errors.default.title'},
-        error: {code: 'UNKNOWN'},
-        showStack: false,
-        startLink: 'my-hof-journey'
+      it('renders the `session-timeout` template with `401` status for session timeouts', () => {
+        res.render.withArgs('session-timeout').yields(null, html);
+
+        const err = {
+          code: 'SESSION_TIMEOUT'
+        };
+
+        const locals = {
+          content: {message: 'errors.session.message', title: 'errors.session.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(401);
+        res.render.should.have.been.calledWith('session-timeout', sinon.match(locals));
+        res.send.should.have.been.calledWith(html);
+
       });
+
+      it('renders the `cookie-error` template with `403` status for cookie errors', () => {
+        res.render.withArgs('cookie-error').yields(null, html);
+
+        const err = {
+          code: 'NO_COOKIES'
+        };
+
+        const locals = {
+          content: {message: 'errors.cookies-required.message', title: 'errors.cookies-required.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(403);
+        res.render.should.have.been.calledWith('cookie-error', sinon.match(locals));
+        res.send.should.have.been.calledWith(html);
+      });
+
+      it('renders the `error` template with `500` status for unknown errors', () => {
+        res.render.withArgs('error').yields(null, html);
+
+        const err = new Error('unknown');
+
+        const locals = {
+          content: {message: 'errors.default.message', title: 'errors.default.title'},
+          error: err,
+          showStack: false,
+          startLink: 'my-hof-journey'
+        };
+
+        middleware(err, req, res, next);
+
+        res.status.should.have.been.calledWith(500);
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+        res.send.should.have.been.calledWith(html);
+      });
+
     });
 
   });
@@ -83,9 +180,7 @@ describe('errors', () => {
   describe('without a translator', () => {
 
     beforeEach(() => {
-      res = httpMock.createResponse({
-        eventEmitter: require('events').EventEmitter
-      });
+      res = reqres.res();
       translate = sinon.stub().returnsArg(0);
       middleware = require('../../lib/errors')();
       next = sinon.stub();
@@ -94,38 +189,40 @@ describe('errors', () => {
     describe('middleware', () => {
 
       beforeEach(() => {
-        req = httpMock.createRequest({
-          method: 'GET',
-          url: '/my-hof-journey',
+        req = reqres.req({
+          path: '/my-hof-journey',
+          method: 'GET'
         });
         res.render = sinon.spy();
       });
 
       it('uses a default title and message', () => {
-        err = {
+        const err = {
           code: 'SESSION_TIMEOUT'
         };
+
+        const locals = {
+          content: {message: 'There is a SESSION_TIMEOUT_ERROR', title: 'SESSION_TIMEOUT_ERROR'}
+        };
+
         middleware(err, req, res, next);
+
         translate.should.have.not.been.called;
-        res.render.should.have.been.calledWith('error', {
-          content: {message: 'There is a SESSION_TIMEOUT_ERROR', title: 'SESSION_TIMEOUT_ERROR'},
-          error: {code: 'SESSION_TIMEOUT'},
-          showStack: false,
-          startLink: 'my-hof-journey'
-        });
+        res.render.should.have.been.calledWith('session-timeout', sinon.match(locals));
+
       });
 
       it('uses a default UNKNOWN title and message when error code is not SESSION_TIMEOUT or NO_COOKIES', () => {
-        err = {
-          code: 'UNKNOWN'
+        const err = new Error('unknown');
+
+        const locals = {
+          content: {message: 'There is a UNKNOWN_ERROR', title: 'UNKNOWN_ERROR'}
         };
+
         middleware(err, req, res, next);
-        res.render.should.have.been.calledWith('error', {
-          content: {message: 'There is a UNKNOWN_ERROR', title: 'UNKNOWN_ERROR'},
-          error: {code: 'UNKNOWN'},
-          showStack: false,
-          startLink: 'my-hof-journey'
-        });
+
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+
       });
 
     });
@@ -136,9 +233,7 @@ describe('errors', () => {
     const logger = {};
 
     beforeEach(() => {
-      res = httpMock.createResponse({
-        eventEmitter: require('events').EventEmitter
-      });
+      res = reqres.res();
       translate = sinon.stub().returnsArg(0);
       logger.error = sinon.spy();
       middleware = require('../../lib/errors')({logger: logger});
@@ -148,19 +243,22 @@ describe('errors', () => {
     describe('the middleware', () => {
 
       beforeEach(() => {
-        req = httpMock.createRequest({
-          method: 'GET',
-          url: '/my-hof-journey',
+        req = reqres.req({
+          path: '/my-hof-journey',
+          method: 'GET'
         });
         res.render = sinon.spy();
       });
 
       it('logs the error', () => {
-        err = {
+        const err = {
           error: 'Error'
         };
+
         middleware(err, req, res, next);
+
         logger.error.should.have.been.calledWith('Error');
+
       });
 
     });
@@ -172,9 +270,7 @@ describe('errors', () => {
     const logger = {};
 
     beforeEach(() => {
-      res = httpMock.createResponse({
-        eventEmitter: require('events').EventEmitter
-      });
+      res = reqres.res();
       translate = sinon.stub().returnsArg(0);
       logger.error = sinon.spy();
       middleware = require('../../lib/errors')({debug: true});
@@ -184,39 +280,35 @@ describe('errors', () => {
     describe('the middleware', () => {
 
       beforeEach(() => {
-        req = httpMock.createRequest({
-          method: 'GET',
-          url: '/my-hof-journey',
+        req = reqres.req({
+          path: '/my-hof-journey',
+          method: 'GET'
         });
         res.render = sinon.spy();
       });
 
       it('shows the stack trace', () => {
-        err = {
-          code: '',
-          message: 'Error message'
+        const err = new Error('unknown');
+
+        const locals = {
+          showStack: true
         };
+
         middleware(err, req, res, next);
-        res.render.should.have.been.calledWith('error', {
-          content: err,
-          error: err,
-          showStack: true,
-          startLink: 'my-hof-journey'
-        });
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
       });
 
       it('assigns err to content', () => {
-        err = {
-          code: '',
-          message: 'Error message'
+        const err = new Error('unknown');
+
+        const locals = {
+          error: err
         };
+
         middleware(err, req, res, next);
-        res.render.should.have.been.calledWith('error', {
-          content: err,
-          error: err,
-          showStack: true,
-          startLink: 'my-hof-journey'
-        });
+
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+
       });
     });
 
@@ -227,9 +319,7 @@ describe('errors', () => {
     const logger = {};
 
     beforeEach(() => {
-      res = httpMock.createResponse({
-        eventEmitter: require('events').EventEmitter
-      });
+      res = reqres.res();
       translate = sinon.stub().returnsArg(0);
       logger.error = sinon.spy();
       middleware = require('../../lib/errors')(translate);
@@ -239,24 +329,24 @@ describe('errors', () => {
     describe('the middleware', () => {
 
       beforeEach(() => {
-        req = httpMock.createRequest({
-          method: 'GET',
-          url: '/my-hof-journey',
+        req = reqres.req({
+          path: '/my-hof-journey',
+          method: 'GET'
         });
         res.render = sinon.spy();
       });
 
       it('does not show the stack trace', () => {
-        err = {
-          code: 'UNKNOWN'
+        const err = new Error('unknown');
+
+        const locals = {
+          showStack: false
         };
+
         middleware(err, req, res, next);
-        res.render.should.have.been.calledWith('error', {
-          content: {message: 'There is a UNKNOWN_ERROR', title: 'UNKNOWN_ERROR'},
-          error: {code: 'UNKNOWN'},
-          showStack: false,
-          startLink: 'my-hof-journey'
-        });
+
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+
       });
     });
 
