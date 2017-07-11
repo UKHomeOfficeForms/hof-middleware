@@ -113,3 +113,33 @@ Using the translation key `fields.field-name.label` will return different values
 * If the value of `dependent-field` is `"value-1"` and the value of `dependent-field-2` is `"value-2"`, the label returned will be `"Label 2"`.
 * If the value of `dependent-field` is `"value-2"` the label returned will be `"Label 3"` regardless of the value of `dependent-field-2`
 * The default label `"Fallback label"` will be used if value of `dependent-field` is neither of the given options, or it is `undefined`. It will also be used if the value of `dependent-field` is `"value-1"` and the value of `dependent-field-2` is neither of the given options or it is undefined.
+
+## Health
+
+The health middleware can be used to test API endpoints that have an impact on your HOF service. The health middleware will make a request to each of the health urls and pass an error to the error middleware if one of the API endpoints returns unsuccessfully.
+The health middleware should be used to inform the user that the service is impacted by another API, which makes the service unusable.
+
+### Usage
+
+Add the health endpoint settings to the `hof` options. A `methods` option can be used to set which methods the endpoints should be called on.
+
+```js
+const hof = require('hof');
+
+hof({
+  routes: [
+    ...
+  ],
+  health: [{
+    url: 'https://third.party.api/monitor',
+    methods: ['get']
+  }, {
+    url: 'http://www.example.com/status'
+  }]
+};
+```
+
+### Options
+
+- `url`: The API endpoint url to call. It should not require any parameters. Required.
+- `methods`: An array of method type strings to indicate on which request methods to call the url. Defaults to all. Optional
