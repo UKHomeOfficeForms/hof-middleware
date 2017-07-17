@@ -1,8 +1,4 @@
-#ide specific
-.idea/
-
 node_modules
 *.log
 .DS_Store
-doc
-Gemfile.lock
+package-lock.json
