@@ -1,6 +1,6 @@
 {
   "name": "hof-middleware",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A collection of commonly used HOF middleware",
   "main": "index.js",
   "license": "GPL-2.0",
