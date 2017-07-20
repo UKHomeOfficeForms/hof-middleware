@@ -14,7 +14,7 @@ describe('not-found', () => {
     });
     req = httpMock.createRequest({
       method: 'GET',
-      url: '/not-here',
+      url: '/foo/bar',
     });
     next = sinon.stub();
     res.render = sinon.spy();
@@ -26,10 +26,11 @@ describe('not-found', () => {
       middleware = require('../../').notFound();
       middleware(req, res, next);
 
-      res.render.should.have.been.calledWith('404', {
+      res.render.should.have.been.calledWith('404', sinon.match({
         title: 'Not found',
-        description: 'There is nothing here'
-      });
+        description: 'There is nothing here',
+        startLink: 'foo'
+      }));
     });
 
     it('renders a 404 with a translated title and description when a translate function is provided', () => {
@@ -39,10 +40,11 @@ describe('not-found', () => {
 
       translate.should.have.been.called;
 
-      res.render.should.have.been.calledWith('404', {
+      res.render.should.have.been.calledWith('404', sinon.match({
         title: 'errors.404.title',
-        description: 'errors.404.description'
-      });
+        description: 'errors.404.description',
+        startLink: 'foo'
+      }));
     });
 
     it('logs a warning when a warn function is provided', () => {
@@ -52,8 +54,24 @@ describe('not-found', () => {
       middleware = require('../../').notFound({logger: logger});
       middleware(req, res, next);
 
-      logger.warn.should.have.been.calledWith('Cannot find: /not-here');
+      logger.warn.should.have.been.calledWith('Cannot find: /foo/bar');
       res.render.should.have.been.called;
+    });
+
+    it('sets the first part of the url path as `startLink` to the locals', () => {
+      req = httpMock.createRequest({
+        method: 'GET',
+        url: '/foo/bar/baz',
+      });
+
+      middleware = require('../../').notFound();
+      middleware(req, res, next);
+
+      res.render.should.have.been.calledWith('404', sinon.match({
+        title: 'Not found',
+        description: 'There is nothing here',
+        startLink: 'foo'
+      }));
     });
 
   });

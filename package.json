@@ -14,12 +14,9 @@
   "homepage": "https://github.com/UKHomeOffice/hof-middleware",
   "author": "HomeOffice",
   "scripts": {
-    "test": "NODE_ENV=test mocha",
-    "lint": "eslint .",
-    "style": "jscs **/*.js --config=./.jscsrc.json"
-  },
-  "engines": {
-    "node": ">=4 <5"
+    "test": "npm run unit && npm run lint",
+    "unit": "NODE_ENV=test mocha",
+    "lint": "eslint ."
   },
   "dependencies": {
     "lodash": "^4.13.1"
@@ -31,7 +28,6 @@
     "eslint-plugin-filenames": "^0.1.1",
     "eslint-plugin-mocha": "^0.2.2",
     "eslint-plugin-one-variable-per-var": "0.0.3",
-    "jscs": "^1.13.1",
     "mocha": "^2.2.5",
     "mocha-junit-reporter": "^1.4.0",
     "mocha-multi": "^0.7.1",
@@ -43,8 +39,6 @@
     "sinon-chai": "^2.8.0"
   },
   "pre-commit": [
-    "lint",
-    "style",
     "test"
   ]
 }
