@@ -38,6 +38,41 @@ describe('errors', () => {
       middleware.should.have.length(4);
     });
 
+    describe('startLink', () => {
+
+      beforeEach(() => {
+        res.render.onCall(0).yields('error', html);
+      });
+
+      it('set to baseUrl when there is a baseUrl', () => {
+        req.path = '/baseUrl/my-hof-journey';
+        res.render = sinon.stub();
+        res.render.onCall(0).yields('error', html);
+
+        const err = {};
+        const locals = {
+          startLink: '/baseUrl'
+        };
+        middleware(err, req, res, next);
+
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+      });
+
+      it('set to `/` when there is no baseUrl', () => {
+        req.path = '/my-hof-journey';
+        res.render = sinon.stub();
+        res.render.onCall(0).yields('error', html);
+
+        const err = {};
+        const locals = {
+          startLink: '/'
+        };
+        middleware(err, req, res, next);
+
+        res.render.should.have.been.calledWith('error', sinon.match(locals));
+      });
+    });
+
     describe('when only the default error template is available', () => {
 
       beforeEach(() => {
@@ -57,7 +92,7 @@ describe('errors', () => {
           content: {message: 'errors.session.message', title: 'errors.session.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
@@ -78,7 +113,7 @@ describe('errors', () => {
           content: {message: 'errors.cookies-required.message', title: 'errors.cookies-required.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
@@ -98,7 +133,7 @@ describe('errors', () => {
           content: {message: 'errors.default.message', title: 'errors.default.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
@@ -122,7 +157,7 @@ describe('errors', () => {
           content: {message: 'errors.session.message', title: 'errors.session.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
@@ -144,7 +179,7 @@ describe('errors', () => {
           content: {message: 'errors.cookies-required.message', title: 'errors.cookies-required.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
@@ -163,7 +198,7 @@ describe('errors', () => {
           content: {message: 'errors.default.message', title: 'errors.default.title'},
           error: err,
           showStack: false,
-          startLink: 'my-hof-journey'
+          startLink: '/'
         };
 
         middleware(err, req, res, next);
