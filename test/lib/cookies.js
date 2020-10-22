@@ -49,6 +49,15 @@ describe('cookies', () => {
       res.redirect.should.have.been.calledWith('/my-hof-journey?' + encodeURIComponent('hof_param'));
     });
 
+    it('preserves existing query parameters on redirect', () => {
+      req = httpMock.createRequest({
+        method: 'GET',
+        url: '/my-hof-journey?existing-query',
+      });
+      middleware(req, res);
+      res.redirect.should.have.been.calledWith('/my-hof-journey?existing-query&' + encodeURIComponent('hof_param'));
+    });
+
     it('raises an error when a cookie could not be set', () => {
       req.cookies = undefined;
       req.query = {

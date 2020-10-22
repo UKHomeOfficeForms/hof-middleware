@@ -1,6 +1,6 @@
 {
   "name": "hof-middleware",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A collection of commonly used HOF middleware",
   "main": "index.js",
   "license": "GPL-2.0",
@@ -19,7 +19,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "urijs": "^1.19.2"
   },
   "devDependencies": {
     "chai": "^3.0.0",
