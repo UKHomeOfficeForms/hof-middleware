@@ -30,6 +30,10 @@ The error raised when cookies are not supported by the client can then
 be handled in you error handler by identifying it using its `code`
 property which will be set to `NO_COOKIES`.
 
+You can also provide an array of healthcheck URLs with `healthcheckUrls`,
+should you not want to throw a Cookies required error when requesting the app with specific URLs.
+Kubernetes healthcheck URLs are provided as defaults if no overrides are supplied.
+
 ## Not found (404)
 
 Expects there to be a view called 404 in your configured `/views` directory
