@@ -58,7 +58,7 @@ describe('cookies', () => {
       res.redirect.should.have.been.calledWith('/my-hof-journey?existing-query&' + encodeURIComponent('hof_param'));
     });
 
-    it('raises an error when a cookie could not be set', () => {
+    it('raises an error when a cookie could not be set with cookies undefined', () => {
       req.cookies = undefined;
       req.query = {
         'hof_param': true
@@ -69,7 +69,7 @@ describe('cookies', () => {
       next.should.have.been.calledWith(err, req, res, next);
     });
 
-    it('raises an error when a cookie could not be set', () => {
+    it('raises an error when a cookie could not be set with cookies empty object', () => {
       req.cookies = {};
       req.query = {
         'hof_param': true
@@ -80,6 +80,28 @@ describe('cookies', () => {
       next.should.have.been.calledWith(err, req, res, next);
     });
 
-  });
+    it('does not raise an error when is a default healthcheck url', () => {
+      req.cookies = {};
+      req.query = {
+        'hof_param': true
+      };
 
+      const healthcheckPaths = [
+          '/healthz',
+          '/readyz',
+          '/livez'
+      ];
+
+      healthcheckPaths.forEach(url => {
+        req.path = url;
+        middleware(req, res, next);
+
+        next.should.have.been.calledWith();
+
+        let err = new Error();
+        err.code = 'NO_COOKIES';
+        next.should.not.have.been.calledWith(err, req, res, next);
+      });
+    });
+  });
 });
