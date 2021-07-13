@@ -80,6 +80,15 @@ describe('cookies', () => {
       next.should.have.been.calledWith(err, req, res, next);
     });
 
+    it('redirects to self when there are no cookies and there is am attempt to redirect to malicious site', () => {
+      req = httpMock.createRequest({
+        method: 'GET',
+        url: '//bbc.co.uk',
+      });
+      middleware(req, res);
+      res.redirect.should.have.been.calledWith('/');
+    });
+
     it('does not raise an error when is a default healthcheck url', () => {
       req.cookies = {};
       req.query = {
