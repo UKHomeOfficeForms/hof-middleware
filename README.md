@@ -1,3 +1,6 @@
+# DEPRECATED
+hof-middleware has been added directly into hof v19.3.5 and should not be installed separately
+
 # hof-middleware
 A collection of commonly used HOF middleware, exports `cookies`, `notFound`, and `errors` on `middleware`
 
